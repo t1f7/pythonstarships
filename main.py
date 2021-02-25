@@ -6,60 +6,46 @@ import time
 import random
 
 
-def think(client):
-
-    while True:
-        time.sleep(random.uniform(1.5, 3.5))
-        if client.heartbeat():
-            print('heartbeat OK')
-
-
-def guestLoop(device):
+def authenticate(device, email=None, password=None):
 
     client = Client(device=device)
-    if not client.login():
-        print('> failed to login :(')
-        return
 
-    if not client.user:
-        print('> no user found..')
-        return
+    if device.refreshToken:
+        print('# This device is already authorized, no need to input credentials.')
+        if client.login():
+            return client
+        return False
 
-    print('> Logged in as ', client.user.name)
-
-    think(client)
-    
-    return True
-
-
-def userLoop(email, password, device):
-
-    client = Client(device=device)
     if not client.login(email=email, password=password):
-        print('> failed to login :(')
-        return
-
-    if not client.user:
-        print('> no user found..')
-        return
-
-    print('> Logged in as ', client.user.name)
-    # ship = client.loadShip()
-
-    think(client)
+        print('[authenticate]', 'failed to login')
+        return False
     
-    return True
+    return client
 
 
 device = Device(language='ru')
+client = None
+
 if device.refreshToken:
-    print('This device is already authorized, no need to input credentials or join as a guest.')
-    guestLoop(device)
+    client = authenticate(device)
 else:
     decide = input("Input G to login as guest. Input A to login as user : ")
     if decide == "G":
-        guestLoop(device)
+        client = authenticate(device)
     else:
         email = input("Enter email: ")
         password = input("Enter password: ")
-        userLoop(email, password, device)
+        client = authenticate(device, email, password)
+
+while client:
+
+    time.sleep(random.uniform(15.5, 30.5))
+
+    if client.heartbeat():
+        print('heartbeat OK')
+
+    time.sleep(random.uniform(0.1, 1.0))
+
+    if client.readyForFreeStabux():
+        client.grabFlyingStarbux(random.randint(1, 2))
+        print('I got', client.freeStarbuxToday, 'free starbux today')

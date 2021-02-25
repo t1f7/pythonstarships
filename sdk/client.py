@@ -1,20 +1,24 @@
 import xmltodict
 import requests
 import urllib.parse
+import time
 
 from .security import ChecksumCreateDevice, ChecksumTimeForDate, ChecksumPasswordWithString, ChecksumEmailAuthorize
 from .dotnet import DotNet
+
 
 class User(object):
     
     id = 0
     name = None
+    isAuthorized = False
     lastHeartBeat = 0
 
-    def __init__(self, id, name, lastHeartBeat):
+    def __init__(self, id, name, lastHeartBeat, isAuthorized):
         self.id = id
         self.name = name
         self.lastHeartBeat = lastHeartBeat
+        self.isAuthorized = True if isAuthorized else False
 
 
 class Client(object):
@@ -35,13 +39,15 @@ class Client(object):
     # runtime data
     user = None
     accessToken = None
+    freeStarbuxToday = 0
+    freeStarbuxTodayTimestamp = 0
 
     def __init__(self, device):
         self.device = device
 
-    def parseUserLoginData(self, content):
+    def parseUserLoginData(self, r):
 
-        d = xmltodict.parse(content, xml_attribs=True)
+        d = xmltodict.parse(r.content, xml_attribs=True)
 
         info = d['UserService']['UserLogin']
         userId = d['UserService']['UserLogin']['@UserId']
@@ -52,8 +58,11 @@ class Client(object):
             myName = d['UserService']['UserLogin']['User']['@Name']
         LastHeartBeat = d['UserService']['UserLogin']['User']['@LastHeartBeatDate']
 
+        if 'FreeStarbuxReceivedToday' in r.text:
+            self.freeStarbuxToday = int(r.text.split('FreeStarbuxReceivedToday="')[1].split('"')[0])
+
         # keep it
-        self.user = User(userId, myName, LastHeartBeat)
+        self.user = User(userId, myName, LastHeartBeat, self.device.refreshToken)
     
     def getAccessToken(self, refreshToken=None):
         
@@ -72,7 +81,7 @@ class Client(object):
             print('[getAccessToken]', 'got an error with data:', r.text)
             return None
         
-        self.parseUserLoginData(r.content)
+        self.parseUserLoginData(r)
 
         if 'accessToken' not in r.text:
             print('[getAccessToken]', 'got no accessToken with data:', r.text)
@@ -124,7 +133,7 @@ class Client(object):
                 print('[login] failed to authenticate with refreshToken:', r.text)
                 return None
 
-            self.parseUserLoginData(r.content)
+            self.parseUserLoginData(r)
 
         else:
 
@@ -168,6 +177,32 @@ class Client(object):
         r = self.request(url, 'GET')
         print('loadShip', r, r.text)
         return r
+    
+    def readyForFreeStabux(self):
+        if self.user.isAuthorized and self.freeStarbuxToday < 25 and self.freeStarbuxTodayTimestamp + 120 < time.time():
+            return True
+        return False
+
+    def grabFlyingStarbux(self, quantity):
+
+        t = DotNet.validDateTime()
+
+        url = self.baseUrl + 'AddStarbux2?quantity={}&clientDateTime={}&checksum={}&accessToken={}'.format(
+            quantity,
+            '{0:%Y-%m-%dT%H:%M:%S}'.format(t),
+            ChecksumTimeForDate(DotNet.get_time()) + ChecksumPasswordWithString(self.accessToken),
+            self.accessToken
+        )
+        r = self.request(url, 'POST')
+
+        if 'Email=' not in r.text:
+            print('[grabFlyingStarbux] failed with next issue:', r, r.text)
+            return False
+        
+        self.freeStarbuxToday = int(r.text.split('FreeStarbuxReceivedToday="')[1].split('"')[0])
+        self.freeStarbuxTodayTimestamp = time.time()
+
+        return True
 
     def heartbeat(self):
 
