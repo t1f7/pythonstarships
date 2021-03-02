@@ -1,4 +1,6 @@
 
+[![v0.2](https://github.com/t1f7/pythonstarships/blob/main/pixelbot.png)](https://github.com/t1f7/pythonstarships/blob/main/pixelbot.png)
+
 # Requirements
 
 `pip3 install xmltodict`
