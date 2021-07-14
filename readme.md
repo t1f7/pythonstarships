@@ -5,6 +5,8 @@
 
 `pip3 install xmltodict`
 
+`pip3 install requests`
+
 + to update `sdk/dotnet.validDateTime` - I messed with timezones and you should update this place if authentication doesn't work.
 
 # Docs
