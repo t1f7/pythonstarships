@@ -11,19 +11,19 @@ def authenticate(device, email=None, password=None):
     client = Client(device=device)
 
     if device.refreshToken:
-        print('# This device is already authorized, no need to input credentials.')
+        print("# This device is already authorized, no need to input credentials.")
         if client.login():
             return client
         return False
 
     if not client.login(email=email, password=password):
-        print('[authenticate]', 'failed to login')
+        print("[authenticate]", "failed to login")
         return False
-    
+
     return client
 
 
-device = Device(language='ru')
+device = Device(language="ru")
 client = None
 
 if device.refreshToken:
@@ -42,10 +42,13 @@ while client:
     time.sleep(random.uniform(15.5, 30.5))
 
     if client.heartbeat():
-        print('heartbeat OK')
+        print("heartbeat OK")
 
     time.sleep(random.uniform(0.1, 1.0))
 
     if client.readyForFreeStabux():
         client.grabFlyingStarbux(random.randint(1, 2))
-        print('I got', client.freeStarbuxToday, 'free starbux today')
+        print("I got", client.freeStarbuxToday, "free starbux today")
+        time.sleep(random.uniform(5.0, 10.0))
+        client.collectAllResources()
+        print("Collected all resources from the ship.")
