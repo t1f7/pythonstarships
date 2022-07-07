@@ -2,6 +2,8 @@ import xmltodict
 import requests
 import urllib.parse
 import time
+import datetime
+from pprint import pprint
 
 from .security import (
     ChecksumCreateDevice,
@@ -46,6 +48,12 @@ class Client(object):
     accessToken = None
     freeStarbuxToday = 0
     freeStarbuxTodayTimestamp = 0
+    dailyReward = 0
+    dailyRewardTimestamp = 0
+    rssCollected = 0
+    rssCollectedTimestamp = 0
+    mineralCollected = 0
+    gasCollected = 0
 
     def __init__(self, device):
         self.device = device
@@ -69,7 +77,12 @@ class Client(object):
             )
 
         # keep it
-        self.user = User(userId, myName, LastHeartBeat, self.device.refreshToken)
+        self.user = User(
+            userId,
+            myName,
+            LastHeartBeat,
+            self.device.refreshToken,
+        )
 
     def getAccessToken(self, refreshToken=None):
 
@@ -208,51 +221,84 @@ class Client(object):
         return r
 
     def collectAllResources(self):
-        if self.user.isAuthorized:
-            url = "https://api.pixelstarships.com/RoomService/CollectAllResources?itemType=None&collectionDate={}&accessToken={}".format(
-                self.accessToken,
+        if self.user.isAuthorized and self.rssCollectedTimestamp + 120 < time.time():
+            url = "https://api.pixelstarships.com/RoomService/CollectAllResources?itemType=None&collectDate={}&accessToken={}".format(
                 "{0:%Y-%m-%dT%H:%M:%S}".format(DotNet.validDateTime()),
+                self.accessToken,
             )
             r = self.request(url, "POST")
+            self.rssCollectedTimestamp = time.time()
+            p = xmltodict.parse(r.content, xml_attribs=True)
+            mineralCollected = int(
+                p["RoomService"]["CollectResources"]["Items"]["Item"][0]["@Quantity"]
+            )
+            gasCollected = int(
+                p["RoomService"]["CollectResources"]["Items"]["Item"][1]["@Quantity"]
+            )
+
+            if self.mineralCollected and self.mineralCollected is not mineralCollected:
+                print(f"Collected {mineralCollected - self.mineralCollected} minerals.")
+
+            if self.gasCollected and self.gasCollected is not gasCollected:
+                print(f"Collected {gasCollected - self.gasCollected} gas.")
+
+            self.mineralCollected = mineralCollected
+            self.gasCollected = gasCollected
+            return True
+        return False
+
+    def collectDailyReward(self):
+        if datetime.datetime.now().time() == datetime.time(20, 0):
+            self.dailyReward = 0
+
+        if self.user.isAuthorized and not self.dailyReward:
+            url = "https://api.pixelstarships.com/UserService/CollectDailyReward2?dailyRewardStatus=Box&argument=1&accessToken={}".format(
+                self.accessToken,
+            )
+            r = self.request(url, "POST")
+            self.dailyReward = 1
+            self.dailyRewardTimestamp = time.time()
+            if "errorMessage=" in r.text:
+                print("Daily reward was already collected from the dropship.")
+                return False
 
             return True
         return False
 
-    def readyForFreeStabux(self):
+    def grabFlyingStarbux(self, quantity):
+        if datetime.datetime.now().time() == datetime.time(20, 0):
+            self.freeStarbuxToday = 0
+
         if (
             self.user.isAuthorized
             and self.freeStarbuxToday < 10
             and self.freeStarbuxTodayTimestamp + 120 < time.time()
         ):
+            t = DotNet.validDateTime()
+
+            url = (
+                self.baseUrl
+                + "AddStarbux2?quantity={}&clientDateTime={}&checksum={}&accessToken={}".format(
+                    quantity,
+                    "{0:%Y-%m-%dT%H:%M:%S}".format(t),
+                    ChecksumTimeForDate(DotNet.get_time())
+                    + ChecksumPasswordWithString(self.accessToken),
+                    self.accessToken,
+                )
+            )
+            r = self.request(url, "POST")
+
+            if "Email=" not in r.text:
+                print("[grabFlyingStarbux] failed with next issue:", r, r.text)
+                return False
+
+            self.freeStarbuxToday = int(
+                r.text.split('FreeStarbuxReceivedToday="')[1].split('"')[0]
+            )
+            self.freeStarbuxTodayTimestamp = time.time()
+
             return True
         return False
-
-    def grabFlyingStarbux(self, quantity):
-
-        t = DotNet.validDateTime()
-
-        url = (
-            self.baseUrl
-            + "AddStarbux2?quantity={}&clientDateTime={}&checksum={}&accessToken={}".format(
-                quantity,
-                "{0:%Y-%m-%dT%H:%M:%S}".format(t),
-                ChecksumTimeForDate(DotNet.get_time())
-                + ChecksumPasswordWithString(self.accessToken),
-                self.accessToken,
-            )
-        )
-        r = self.request(url, "POST")
-
-        if "Email=" not in r.text:
-            print("[grabFlyingStarbux] failed with next issue:", r, r.text)
-            return False
-
-        self.freeStarbuxToday = int(
-            r.text.split('FreeStarbuxReceivedToday="')[1].split('"')[0]
-        )
-        self.freeStarbuxTodayTimestamp = time.time()
-
-        return True
 
     def heartbeat(self):
 
@@ -280,7 +326,7 @@ class Client(object):
         if r.status_code == 200 and 'success="t' in r.text:
             success = True
         else:
-            print("heartbeat fail", r, r.text)
+            print("Heartbeat fail")
 
         self.user.lastHeartBeat = "{0:%Y-%m-%dT%H:%M:%S}".format(t)
 
