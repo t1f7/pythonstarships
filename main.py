@@ -1,5 +1,6 @@
 from sdk.client import Client
 from sdk.device import Device
+import sys
 
 # for 'think'ing method
 import time
@@ -41,14 +42,19 @@ while client:
 
     time.sleep(random.uniform(15.5, 30.5))
 
-    if client.heartbeat():
-        print("heartbeat OK")
+    client.heartbeat()
 
     time.sleep(random.uniform(0.1, 1.0))
 
-    if client.readyForFreeStabux():
-        client.grabFlyingStarbux(random.randint(1, 2))
+    if client.grabFlyingStarbux(random.randint(1, 2)):
         print("I got", client.freeStarbuxToday, "free starbux today")
-        time.sleep(random.uniform(5.0, 10.0))
-        client.collectAllResources()
-        print("Collected all resources from the ship.")
+    if client.freeStarbuxToday >= 10:
+        sys.exit("Collected all available free starbux.")
+    time.sleep(random.uniform(5.0, 10.0))
+
+    client.collectAllResources()
+    time.sleep(random.uniform(5.0, 10.0))
+
+    if client.collectDailyReward():
+        print("Collected daily reward from the dropship.")
+    time.sleep(random.uniform(5.0, 10.0))

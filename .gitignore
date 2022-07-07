@@ -1,0 +1,4 @@
+venv
+.profiles
+.device
+__pycache__
