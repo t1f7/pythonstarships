@@ -56,6 +56,7 @@ class Client(object):
     mineralCollected = 0
     gasCollected = 0
     dronesCollected = dict()
+    dailyRewardArgument = 0
 
     def __init__(self, device):
         self.device = device
@@ -252,33 +253,35 @@ class Client(object):
             return True
         return False
 
-    def collectDailyReward(self, argument=0):
+    def collectDailyReward(self):
         if datetime.datetime.now().time() == datetime.time(20, 0):
             self.dailyReward = 0
 
         if self.user.isAuthorized and not self.dailyReward:
             url = "https://api.pixelstarships.com/UserService/CollectDailyReward2?dailyRewardStatus=Box&argument={}&accessToken={}".format(
-                argument,
+                self.dailyRewardArgument,
                 self.accessToken,
+            )
+
+            print(
+                "Collecting daily reward with argument {}.".format(
+                    self.dailyRewardArgument
+                )
             )
             r = self.request(url, "POST")
 
-            self.dailyReward = 1
-            self.dailyRewardTimestamp = time.time()
-
-            if "Rewards have been changed" in r.text:
-                for i in range(9):
-                    if self.collectDailyReward(i):
-                        return True
-                    else:
-                        return False
-                    time.sleep(random.uniform(2.0, 2.5))
-
-            if "errorMessage=" in r.text:
+            if "You already collected this reward." in r.text:
+                self.dailyRewardTimestamp = time.time()
+                self.dailyReward = 1
                 print("Daily reward was already collected from the dropship.")
-                d = xmltodict.parse(r.content, xml_attribs=True)
-                pprint(d)
                 return False
+
+            if "Rewards have been changed." in r.text:
+                while self.dailyRewardArgument < 10:
+                    time.sleep(random.uniform(2.0, 2.5))
+                    self.dailyRewardArgument += 1
+                    if not self.collectDailyReward():
+                        return False
 
             return True
         return False
