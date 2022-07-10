@@ -2,3 +2,6 @@ venv
 .profiles
 .device
 __pycache__
+collectrss.err
+collectrss.out
+collectrss.sh

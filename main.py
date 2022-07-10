@@ -24,7 +24,7 @@ def authenticate(device, email=None, password=None):
     return client
 
 
-device = Device(language="ru")
+device = Device(language="en")
 client = None
 
 if device.refreshToken:
@@ -46,15 +46,41 @@ while client:
 
     time.sleep(random.uniform(0.1, 1.0))
 
+    if client.collectDailyReward():
+        print("Collected daily reward from the dropship.")
+    time.sleep(random.uniform(5.0, 10.0))
+
     if client.grabFlyingStarbux(random.randint(1, 2)):
         print("I got", client.freeStarbuxToday, "free starbux today")
+
     if client.freeStarbuxToday >= 10:
+        #        if client.collectMiningDrone(11638355):
+        #            print("Collected a mine drone.")
+        #            time.sleep(random.uniform(5.0, 10.0))
+        #
+        #        if client.collectMiningDrone(11638356):
+        #            print("Collected a mine drone.")
+        #            time.sleep(random.uniform(5.0, 10.0))
+        #
+        #        if client.collectMiningDrone(11638362):
+        #            print("Collected a mine drone.")
+        #            time.sleep(random.uniform(5.0, 10.0))
+        #
+        #        if client.placeMiningDrone("299", "1651"):
+        #            print("Successfully placed mining drone.")
+        #            time.sleep(random.uniform(5.0, 10.0))
+        #
+        #        if client.placeMiningDrone("299", "1651"):
+        #            print("Successfully placed mining drone.")
+        #            time.sleep(random.uniform(5.0, 10.0))
+        #
+        #        if client.placeMiningDrone("299", "1651"):
+        #            print("Successfully placed mining drone.")
+        #            time.sleep(random.uniform(5.0, 10.0))
+        #
         sys.exit("Collected all available free starbux.")
+
     time.sleep(random.uniform(5.0, 10.0))
 
     client.collectAllResources()
-    time.sleep(random.uniform(5.0, 10.0))
-
-    if client.collectDailyReward():
-        print("Collected daily reward from the dropship.")
     time.sleep(random.uniform(5.0, 10.0))

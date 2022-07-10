@@ -4,6 +4,7 @@ import urllib.parse
 import time
 import datetime
 from pprint import pprint
+import random
 
 from .security import (
     ChecksumCreateDevice,
@@ -54,6 +55,8 @@ class Client(object):
     rssCollectedTimestamp = 0
     mineralCollected = 0
     gasCollected = 0
+    dronesCollected = dict()
+    dailyRewardArgument = 0
 
     def __init__(self, device):
         self.device = device
@@ -227,8 +230,11 @@ class Client(object):
                 self.accessToken,
             )
             r = self.request(url, "POST")
+            if "errorMessage=" in r.text:
+                d = xmltodict.parse(r.content, xml_attribs=True)
+                pprint(d)
+
             self.rssCollectedTimestamp = time.time()
-            p = xmltodict.parse(r.content, xml_attribs=True)
             mineralCollected = int(
                 p["RoomService"]["CollectResources"]["Items"]["Item"][0]["@Quantity"]
             )
@@ -248,20 +254,80 @@ class Client(object):
         return False
 
     def collectDailyReward(self):
-        if datetime.datetime.now().time() == datetime.time(20, 0):
+        if datetime.datetime.now().time() == datetime.time(
+            hour=0, minute=0, tzinfo=datetime.timezone.utc
+        ):
             self.dailyReward = 0
 
         if self.user.isAuthorized and not self.dailyReward:
-            url = "https://api.pixelstarships.com/UserService/CollectDailyReward2?dailyRewardStatus=Box&argument=1&accessToken={}".format(
+            url = "https://api.pixelstarships.com/UserService/CollectDailyReward2?dailyRewardStatus=Box&argument={}&accessToken={}".format(
+                self.dailyRewardArgument,
                 self.accessToken,
             )
+
+            print(
+                "Collecting daily reward with argument {}.".format(
+                    self.dailyRewardArgument
+                )
+            )
             r = self.request(url, "POST")
-            self.dailyReward = 1
-            self.dailyRewardTimestamp = time.time()
-            if "errorMessage=" in r.text:
+
+            if "You already collected this reward." in r.text:
+                self.dailyRewardTimestamp = time.time()
+                self.dailyReward = 1
                 print("Daily reward was already collected from the dropship.")
                 return False
 
+            if "Rewards have been changed." in r.text:
+                while self.dailyRewardArgument < 10:
+                    time.sleep(random.uniform(2.0, 5.0))
+                    self.dailyRewardArgument += 1
+                    if not self.collectDailyReward():
+                        return False
+
+            return True
+        return False
+
+    def collectMiningDrone(self, starSystemMarkerId):
+        if self.user.isAuthorized and starSystemMarkerId not in self.dronesCollected:
+            url = "https://api.pixelstarships.com/GalaxyService/CollectMarker2?starSystemMarkerId={}&checksum={}&clientDateTime={}&accessToken={}".format(
+                starSystemMarkerId,
+                (
+                    ChecksumTimeForDate(DotNet.get_time())
+                    + ChecksumPasswordWithString(self.accessToken)
+                ),
+                "{0:%Y-%m-%dT%H:%M:%S}".format(DotNet.validDateTime()),
+                self.accessToken,
+            )
+            r = self.request(url, "POST")
+            if "errorMessage=" in r.text:
+                d = xmltodict.parse(r.content, xml_attribs=True)
+                pprint(d)
+                print(url)
+                return False
+
+            self.dronesCollected[starSystemMarkerId] = 1
+            return True
+        return False
+
+    def placeMiningDrone(self, missionDesignId, missionEventId):
+        if self.user.isAuthorized:
+            url = "https://api.pixelstarships.com/MissionService/SelectInstantMission3?missionDesignId={}&missionEventId={}&messageId=0&clientDateTime={},clientNumber=0&checksum={}&accessToken={}".format(
+                missionDesignId,
+                missionEventId,
+                "{0:%Y-%m-%dT%H:%M:%S}".format(DotNet.validDateTime()),
+                (
+                    ChecksumTimeForDate(DotNet.get_time())
+                    + ChecksumPasswordWithString(self.accessToken)
+                ),
+                self.accessToken,
+            )
+            r = self.request(url, "POST")
+            if "errorMessage=" in r.text:
+                d = xmltodict.parse(r.content, xml_attribs=True)
+                pprint(d)
+                print(url)
+                return False
             return True
         return False
 
@@ -289,7 +355,9 @@ class Client(object):
             r = self.request(url, "POST")
 
             if "Email=" not in r.text:
-                print("[grabFlyingStarbux] failed with next issue:", r, r.text)
+                d = xmltodict.parse(r.content, xml_attribs=True)
+                pprint(d)
+                print(f"[grabFlyingStarbux] failed with next issue: {r.text}")
                 return False
 
             self.freeStarbuxToday = int(
