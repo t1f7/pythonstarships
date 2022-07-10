@@ -254,7 +254,9 @@ class Client(object):
         return False
 
     def collectDailyReward(self):
-        if datetime.datetime.now().time() == datetime.time(20, 0):
+        if datetime.datetime.now().time() == datetime.time(
+            hour=0, minute=0, tzinfo=datetime.timezone.utc
+        ):
             self.dailyReward = 0
 
         if self.user.isAuthorized and not self.dailyReward:
@@ -278,7 +280,7 @@ class Client(object):
 
             if "Rewards have been changed." in r.text:
                 while self.dailyRewardArgument < 10:
-                    time.sleep(random.uniform(2.0, 2.5))
+                    time.sleep(random.uniform(2.0, 5.0))
                     self.dailyRewardArgument += 1
                     if not self.collectDailyReward():
                         return False
