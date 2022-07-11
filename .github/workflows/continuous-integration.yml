@@ -39,7 +39,6 @@ jobs:
     needs: skip_duplicate
     if: ${{ needs.skip_duplicate.outputs.should_skip == 'false' }}
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
