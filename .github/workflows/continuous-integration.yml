@@ -2,7 +2,11 @@ name: CI
 on:
   push:
     paths-ignore:
-      - 'CHANGELOG.md'
+      - 'readme.md'
+      - '.github/**'
+      - 'requirements.txt'
+      - '.gitignore'
+      - 'pixelbot.png'
   pull_request:
   schedule:
     - cron: '0 11 * * 4'
