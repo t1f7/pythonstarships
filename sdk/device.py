@@ -1,7 +1,6 @@
 import string
 import random
 import os
-import configparser
 
 
 class Device(object):
@@ -10,13 +9,7 @@ class Device(object):
     key = None
     refreshToken = None
     languageKey = "en"
-    DB = ".device"
-    config = configparser.ConfigParser()
-    config.read(os.path.expanduser("~/.pythonstarships"))
-
-    # file as database
-    if os.path.isdir(config["DEFAULT"]["DB"]):
-        DB = "{}/{}".format(config["DEFAULT"]["DB"], DB)
+    DB = "/Users/rdottin/Documents/Personal/pythonstarships/collectallresources/.device"
 
     def __init__(self, name="DeviceTypeMac", key=None, language="en"):
 

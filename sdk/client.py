@@ -223,6 +223,40 @@ class Client(object):
         print("loadShip", r, r.text)
         return r
 
+    def print_market_data(self, v):
+        message = "".join(v["@Message"])
+        currency = v["@ActivityArgument"].split(":")[0]
+        price = v["@ActivityArgument"].split(":")[1]
+        print("{} for {} {}.".format(message, price, currency))
+
+    def listActiveMarketplaceMessages(self):
+        if self.user.isAuthorized:
+            url = "https://api.pixelstarships.com/MessageService/ListActiveMarketplaceMessages5?itemSubType=None&rarity=None&currencyType=Unknown&itemDesignId=0&userId={}&accessToken={}".format(
+                self.user.id, self.accessToken
+            )
+            r = self.request(url, "GET")
+            d = xmltodict.parse(r.content, xml_attribs=True)
+            messageData = None
+            if "errorMessage=" in r.text:
+                pprint(d)
+                return False
+
+            if d["MessageService"]["ListActiveMarketplaceMessages"]["Messages"] == None:
+                print("No items being sold.")
+                return False
+
+            for k, v in d["MessageService"]["ListActiveMarketplaceMessages"][
+                "Messages"
+            ].items():
+                if isinstance(v, dict):
+                    self.print_market_data(v)
+                elif isinstance(v, list):
+                    for i in v:
+                        if isinstance(i, dict):
+                            self.print_market_data(i)
+
+            return True
+
     def collectAllResources(self):
         if self.user.isAuthorized and self.rssCollectedTimestamp + 120 < time.time():
             url = "https://api.pixelstarships.com/RoomService/CollectAllResources?itemType=None&collectDate={}&accessToken={}".format(
@@ -230,16 +264,17 @@ class Client(object):
                 self.accessToken,
             )
             r = self.request(url, "POST")
+            d = xmltodict.parse(r.content, xml_attribs=True)
             if "errorMessage=" in r.text:
-                d = xmltodict.parse(r.content, xml_attribs=True)
                 pprint(d)
+                return False
 
             self.rssCollectedTimestamp = time.time()
             mineralCollected = int(
-                p["RoomService"]["CollectResources"]["Items"]["Item"][0]["@Quantity"]
+                d["RoomService"]["CollectResources"]["Items"]["Item"][0]["@Quantity"]
             )
             gasCollected = int(
-                p["RoomService"]["CollectResources"]["Items"]["Item"][1]["@Quantity"]
+                d["RoomService"]["CollectResources"]["Items"]["Item"][1]["@Quantity"]
             )
 
             if self.mineralCollected and self.mineralCollected is not mineralCollected:
@@ -265,24 +300,21 @@ class Client(object):
                 self.accessToken,
             )
 
-            print(
-                "Collecting daily reward with argument {}.".format(
-                    self.dailyRewardArgument
-                )
-            )
             r = self.request(url, "POST")
 
-            if "You already collected this reward." in r.text:
+            if "You already collected this reward" in r.text:
                 self.dailyRewardTimestamp = time.time()
                 self.dailyReward = 1
                 print("Daily reward was already collected from the dropship.")
                 return False
 
-            if "Rewards have been changed." in r.text:
+            if "Rewards have been changed" in r.text:
                 while self.dailyRewardArgument < 10:
                     time.sleep(random.uniform(2.0, 5.0))
                     self.dailyRewardArgument += 1
-                    if not self.collectDailyReward():
+                    if self.collectDailyReward():
+                        return True
+                    else:
                         return False
 
             return True

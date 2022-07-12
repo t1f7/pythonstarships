@@ -43,7 +43,6 @@ while client:
     time.sleep(random.uniform(15.5, 30.5))
 
     client.heartbeat()
-
     time.sleep(random.uniform(0.1, 1.0))
 
     if client.collectDailyReward():
@@ -52,6 +51,7 @@ while client:
 
     if client.grabFlyingStarbux(random.randint(1, 2)):
         print("I got", client.freeStarbuxToday, "free starbux today")
+    time.sleep(random.uniform(5.0, 10.0))
 
     if client.freeStarbuxToday >= 10:
         #        if client.collectMiningDrone(11638355):
@@ -78,9 +78,8 @@ while client:
         #            print("Successfully placed mining drone.")
         #            time.sleep(random.uniform(5.0, 10.0))
         #
+        client.listActiveMarketplaceMessages()
         sys.exit("Collected all available free starbux.")
-
-    time.sleep(random.uniform(5.0, 10.0))
 
     client.collectAllResources()
     time.sleep(random.uniform(5.0, 10.0))
