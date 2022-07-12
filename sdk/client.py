@@ -278,10 +278,14 @@ class Client(object):
             )
 
             if self.mineralCollected and self.mineralCollected is not mineralCollected:
-                print(f"Collected {mineralCollected - self.mineralCollected} minerals.")
+                print(
+                    f"Collected {mineralCollected - self.mineralCollected} minerals and total is {mineralCollected}."
+                )
 
             if self.gasCollected and self.gasCollected is not gasCollected:
-                print(f"Collected {gasCollected - self.gasCollected} gas.")
+                print(
+                    f"Collected {gasCollected - self.gasCollected} gas and total is {gasCollected}."
+                )
 
             self.mineralCollected = mineralCollected
             self.gasCollected = gasCollected
