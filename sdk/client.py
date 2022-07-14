@@ -5,6 +5,7 @@ import time
 import datetime
 from pprint import pprint
 import random
+import sys
 
 from .security import (
     ChecksumCreateDevice,
@@ -65,7 +66,12 @@ class Client(object):
 
         d = xmltodict.parse(r.content, xml_attribs=True)
 
-        info = d["UserService"]["UserLogin"]
+        info = d["UserService"]["UserLogin"]["User"]
+        print(
+            "Your Pixel Starhips username is {} with {} as its registered email address.".format(
+                info["@Name"], info["@Email"]
+            )
+        )
         userId = d["UserService"]["UserLogin"]["@UserId"]
 
         if not self.device.refreshToken:
@@ -79,6 +85,7 @@ class Client(object):
                 r.text.split('FreeStarbuxReceivedToday="')[1].split('"')[0]
             )
 
+        # print(f"You received {self.freeStarbuxToday} starbux today.")
         # keep it
         self.user = User(
             userId,
@@ -114,6 +121,7 @@ class Client(object):
 
         if "errorCode" in r.text:
             print("[getAccessToken]", "got an error with data:", r.text)
+            sys.exit(1)
             return None
 
         self.parseUserLoginData(r)
@@ -193,6 +201,7 @@ class Client(object):
                     "[login] failed to authorize with credentials with the reason:",
                     r.text,
                 )
+                sys.exit(1)
                 return False
 
             if "refreshToken" not in r.text:
@@ -239,6 +248,7 @@ class Client(object):
             messageData = None
             if "errorMessage=" in r.text:
                 pprint(d)
+                sys.exit(1)
                 return False
 
             if d["MessageService"]["ListActiveMarketplaceMessages"]["Messages"] == None:
@@ -267,6 +277,7 @@ class Client(object):
             d = xmltodict.parse(r.content, xml_attribs=True)
             if "errorMessage=" in r.text:
                 pprint(d)
+                sys.exit(1)
                 return False
 
             self.rssCollectedTimestamp = time.time()
@@ -339,7 +350,6 @@ class Client(object):
             if "errorMessage=" in r.text:
                 d = xmltodict.parse(r.content, xml_attribs=True)
                 pprint(d)
-                print(url)
                 return False
 
             self.dronesCollected[starSystemMarkerId] = 1
@@ -389,9 +399,9 @@ class Client(object):
                 )
             )
             r = self.request(url, "POST")
+            d = xmltodict.parse(r.content, xml_attribs=True)
 
             if "Email=" not in r.text:
-                d = xmltodict.parse(r.content, xml_attribs=True)
                 pprint(d)
                 print(f"[grabFlyingStarbux] failed with next issue: {r.text}")
                 return False
