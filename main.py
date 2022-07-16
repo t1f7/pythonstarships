@@ -7,11 +7,13 @@ from configparser import ConfigParser
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email.message import Message
 
 
 class LogFile:
     def __init__(self, filename):
-        self.out_file = open(filename, "a")
+        self.out_file = open(filename, "w")
         self.old_stdout = sys.stdout
         sys.stdout = self
 
@@ -26,12 +28,7 @@ class LogFile:
         sys.stdout = self.old_stdout
 
 
-def email_logfile(filename):
-    mail_content = ""
-
-    with open(filename) as f:
-        mail_content = """{}""".format(f.readlines())
-
+def email_logfile(filename, client):
     config = ConfigParser()
     config.read(
         "/Users/rdottin/Documents/Personal/pythonstarships/collectallresources/.config"
@@ -42,22 +39,28 @@ def email_logfile(filename):
         password = config.get("MAIL_CONFIG", "SENDER_PASSWD")
         recipient = config.get("MAIL_CONFIG", "RECIPIENT_EMAIL")
     except:
-        print("Authentication not properly setup to email log file")
+        print(
+            "Unable to email log file because email authentication is not properly setup."
+        )
         return None
 
-    message = MIMEMultipart()
-    message["From"] = email
-    message["To"] = recipient
-    message["Subject"] = "Pixel Starships Automation Log"
+    with open(filename, "rb") as f:
+        logs = f.read()
+    message = Message()
+    message.set_payload(logs)
+    subject = f"Pixel Starships Automation Log: {client.user.name}"
 
-    message.attach(MIMEText(mail_content, "plain"))
-
-    session = smtplib.SMTP("smtp.gmail.com", 587)
-    session.starttls()
-    session.login(email, password)
-    text = message.as_string()
-    session.sendmail(email, recipient, text)
-    session.quit()
+    try:
+        session = smtplib.SMTP("smtp.gmail.com", 587)
+        session.ehlo()
+        session.starttls()
+        session.ehlo()
+        session.login(email, password)
+        data = f"Subject: {subject} \n {message}"
+        session.sendmail(email, recipient, data)
+        session.quit()
+    except Exception as e:
+        print(e)
 
 
 def authenticate(device, email=None, password=None):
@@ -94,50 +97,46 @@ def main():
                 client = authenticate(device, email, password)
 
         while client:
+            time.sleep(random.uniform(15.5, 30.5))
+            client.heartbeat()
+            time.sleep(random.uniform(0.1, 1.0))
 
-            if client.freeStarbuxToday >= 10:
-                time.sleep(random.uniform(15.5, 30.5))
-                client.heartbeat()
-                time.sleep(random.uniform(0.1, 1.0))
+            client.grabFlyingStarbux(random.randint(1, 2))
+            time.sleep(random.uniform(5.0, 10.0))
 
+            if client.freeStarbuxToday == 10:
                 if client.collectDailyReward():
-                    print("Collected daily reward from the dropship.")
+                    print("The script collected the daily reward from the dropship.")
                 time.sleep(random.uniform(5.0, 10.0))
 
-                client.grabFlyingStarbux(random.randint(1, 2))
-                time.sleep(random.uniform(5.0, 10.0))
+                # if client.collectMiningDrone(11638355):
+                #    print("Collected a mine drone.")
+                # time.sleep(random.uniform(5.0, 10.0))
+                # if client.collectMiningDrone(11638356):
+                #    print("Collected a mine drone.")
+                # time.sleep(random.uniform(5.0, 10.0))
+                # if client.collectMiningDrone(11638362):
+                #    print("Collected a mine drone.")
+                # time.sleep(random.uniform(5.0, 10.0))
+                # if client.placeMiningDrone("299", "1651"):
+                #    print("Successfully placed mining drone.")
+                # time.sleep(random.uniform(5.0, 10.0))
+                # if client.placeMiningDrone("299", "1651"):
+                #    print("Successfully placed mining drone.")
+                # time.sleep(random.uniform(5.0, 10.0))
+                # if client.placeMiningDrone("299", "1651"):
+                #    print("Successfully placed mining drone.")
+                # time.sleep(random.uniform(5.0, 10.0))
 
-                #        if client.collectMiningDrone(11638355):
-                #            print("Collected a mine drone.")
-                #            time.sleep(random.uniform(5.0, 10.0))
-                #
-                #        if client.collectMiningDrone(11638356):
-                #            print("Collected a mine drone.")
-                #            time.sleep(random.uniform(5.0, 10.0))
-                #
-                #        if client.collectMiningDrone(11638362):
-                #            print("Collected a mine drone.")
-                #            time.sleep(random.uniform(5.0, 10.0))
-                #
-                #        if client.placeMiningDrone("299", "1651"):
-                #            print("Successfully placed mining drone.")
-                #            time.sleep(random.uniform(5.0, 10.0))
-                #
-                #        if client.placeMiningDrone("299", "1651"):
-                #            print("Successfully placed mining drone.")
-                #            time.sleep(random.uniform(5.0, 10.0))
-                #
-                #        if client.placeMiningDrone("299", "1651"):
-                #            print("Successfully placed mining drone.")
-                #            time.sleep(random.uniform(5.0, 10.0))
-                #
-                # print("I collected", client.freeStarbuxToday, "free starbux today.")
                 client.collectAllResources()
                 time.sleep(random.uniform(5.0, 10.0))
                 client.listActiveMarketplaceMessages()
-                print("Collected all available free starbux.")
+                print(
+                    f"A total of {client.freeStarbuxToday} free starbux was collected today."
+                )
+                print(f"You have a total of {client.credits} starbux.")
                 break
-    email_logfile(logfilepath)
+    email_logfile(logfilepath, client)
 
 
 if __name__ == "__main__":
