@@ -4,6 +4,7 @@ import urllib.parse
 import time
 import datetime
 import random
+import sys
 
 from .security import (
     ChecksumCreateDevice,
@@ -125,6 +126,7 @@ class Client(object):
 
         if "errorCode" in r.text:
             print("[getAccessToken]", "got an error with data:", r.text)
+            sys.exit(1)
             return None
 
         self.parseUserLoginData(r)
@@ -205,6 +207,7 @@ class Client(object):
                     "[login] failed to authorize with credentials with the reason:",
                     r.text,
                 )
+                sys.exit(1)
                 return False
 
             if "refreshToken" not in r.text:
@@ -265,7 +268,6 @@ class Client(object):
                     for i in v:
                         if isinstance(i, dict):
                             self.print_market_data(i)
-
             return True
 
     def collectAllResources(self):
@@ -289,7 +291,6 @@ class Client(object):
             print(
                 f"There is a total of {d['RoomService']['CollectResources']['Items']['Item'][1]['@Quantity']} gas on the ship."
             )
-
             return True
         return False
 
@@ -398,7 +399,6 @@ class Client(object):
         return False
 
     def heartbeat(self):
-
         if self.user.lastHeartBeat:
             hours = self.user.lastHeartBeat.split("T")[1]
             seconds = hours.split(":")[-1]
