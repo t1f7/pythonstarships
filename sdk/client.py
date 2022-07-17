@@ -3,9 +3,7 @@ import requests
 import urllib.parse
 import time
 import datetime
-from pprint import pprint
 import random
-import sys
 
 from .security import (
     ChecksumCreateDevice,
@@ -48,16 +46,20 @@ class Client(object):
     # runtime data
     user = None
     accessToken = None
+    checksum = None
     freeStarbuxToday = 0
     freeStarbuxTodayTimestamp = 0
     dailyReward = 0
     dailyRewardTimestamp = 0
     rssCollected = 0
     rssCollectedTimestamp = 0
-    mineralCollected = 0
-    gasCollected = 0
+    mineralTotal = 0
+    gasTotal = 0
+    mineralIncrease = 0
+    gasIncrease = 0
     dronesCollected = dict()
     dailyRewardArgument = 0
+    credits = 0
 
     def __init__(self, device):
         self.device = device
@@ -73,6 +75,7 @@ class Client(object):
             )
         )
         userId = d["UserService"]["UserLogin"]["@UserId"]
+        self.credits = d["UserService"]["UserLogin"]["User"]["@Credits"]
 
         if not self.device.refreshToken:
             myName = "guest"
@@ -87,6 +90,7 @@ class Client(object):
 
         # print(f"You received {self.freeStarbuxToday} starbux today.")
         # keep it
+        # Store User details here.
         self.user = User(
             userId,
             myName,
@@ -121,7 +125,6 @@ class Client(object):
 
         if "errorCode" in r.text:
             print("[getAccessToken]", "got an error with data:", r.text)
-            sys.exit(1)
             return None
 
         self.parseUserLoginData(r)
@@ -161,6 +164,7 @@ class Client(object):
         checksum = ChecksumEmailAuthorize(
             self.device.key, email, ts, self.accessToken, self.salt
         )
+        self.checksum = checksum
 
         # if refreshToken was used we get acquire session without credentials
         if self.device.refreshToken:
@@ -201,7 +205,6 @@ class Client(object):
                     "[login] failed to authorize with credentials with the reason:",
                     r.text,
                 )
-                sys.exit(1)
                 return False
 
             if "refreshToken" not in r.text:
@@ -245,14 +248,12 @@ class Client(object):
             )
             r = self.request(url, "GET")
             d = xmltodict.parse(r.content, xml_attribs=True)
-            messageData = None
             if "errorMessage=" in r.text:
-                pprint(d)
-                sys.exit(1)
+                print(f"An error occurred: {r.text}.")
                 return False
 
             if d["MessageService"]["ListActiveMarketplaceMessages"]["Messages"] == None:
-                print("No items being sold.")
+                print("There are no items being sold.")
                 return False
 
             for k, v in d["MessageService"]["ListActiveMarketplaceMessages"][
@@ -276,30 +277,19 @@ class Client(object):
             r = self.request(url, "POST")
             d = xmltodict.parse(r.content, xml_attribs=True)
             if "errorMessage=" in r.text:
-                pprint(d)
-                sys.exit(1)
+                print(f"An error occurred: {r.text}.")
                 return False
 
+            self.credits = d["RoomService"]["CollectResources"]["User"]["@Credits"]
             self.rssCollectedTimestamp = time.time()
-            mineralCollected = int(
-                d["RoomService"]["CollectResources"]["Items"]["Item"][0]["@Quantity"]
+
+            print(
+                f"There is a total of {d['RoomService']['CollectResources']['Items']['Item'][0]['@Quantity']} minerals on the ship."
             )
-            gasCollected = int(
-                d["RoomService"]["CollectResources"]["Items"]["Item"][1]["@Quantity"]
+            print(
+                f"There is a total of {d['RoomService']['CollectResources']['Items']['Item'][1]['@Quantity']} gas on the ship."
             )
 
-            if self.mineralCollected and self.mineralCollected is not mineralCollected:
-                print(
-                    f"Collected {mineralCollected - self.mineralCollected} minerals and total is {mineralCollected}."
-                )
-
-            if self.gasCollected and self.gasCollected is not gasCollected:
-                print(
-                    f"Collected {gasCollected - self.gasCollected} gas and total is {gasCollected}."
-                )
-
-            self.mineralCollected = mineralCollected
-            self.gasCollected = gasCollected
             return True
         return False
 
@@ -320,7 +310,9 @@ class Client(object):
             if "You already collected this reward" in r.text:
                 self.dailyRewardTimestamp = time.time()
                 self.dailyReward = 1
-                print("Daily reward was already collected from the dropship.")
+                print(
+                    "The script already collected the daily reward from the dropship."
+                )
                 return False
 
             if "Rewards have been changed" in r.text:
@@ -336,20 +328,17 @@ class Client(object):
         return False
 
     def collectMiningDrone(self, starSystemMarkerId):
+
         if self.user.isAuthorized and starSystemMarkerId not in self.dronesCollected:
             url = "https://api.pixelstarships.com/GalaxyService/CollectMarker2?starSystemMarkerId={}&checksum={}&clientDateTime={}&accessToken={}".format(
                 starSystemMarkerId,
-                (
-                    ChecksumTimeForDate(DotNet.get_time())
-                    + ChecksumPasswordWithString(self.accessToken)
-                ),
+                self.checksum,
                 "{0:%Y-%m-%dT%H:%M:%S}".format(DotNet.validDateTime()),
                 self.accessToken,
             )
             r = self.request(url, "POST")
             if "errorMessage=" in r.text:
-                d = xmltodict.parse(r.content, xml_attribs=True)
-                pprint(d)
+                print(f"An error occurred: {r.text}.")
                 return False
 
             self.dronesCollected[starSystemMarkerId] = 1
@@ -362,17 +351,12 @@ class Client(object):
                 missionDesignId,
                 missionEventId,
                 "{0:%Y-%m-%dT%H:%M:%S}".format(DotNet.validDateTime()),
-                (
-                    ChecksumTimeForDate(DotNet.get_time())
-                    + ChecksumPasswordWithString(self.accessToken)
-                ),
+                self.checksum,
                 self.accessToken,
             )
             r = self.request(url, "POST")
             if "errorMessage=" in r.text:
-                d = xmltodict.parse(r.content, xml_attribs=True)
-                pprint(d)
-                print(url)
+                print(f"An error occurred: {r.text}.")
                 return False
             return True
         return False
@@ -402,7 +386,6 @@ class Client(object):
             d = xmltodict.parse(r.content, xml_attribs=True)
 
             if "Email=" not in r.text:
-                pprint(d)
                 print(f"[grabFlyingStarbux] failed with next issue: {r.text}")
                 return False
 
