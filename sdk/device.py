@@ -4,7 +4,7 @@ import os
 
 class Device(object):
 
-    name = "DeviceTypeMac"
+    name = "Android"
     key = None
     refreshToken = None
     languageKey = "en"

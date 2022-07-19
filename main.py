@@ -82,7 +82,7 @@ def authenticate(device, email=None, password=None):
 def main():
     logfilepath = "/Users/rdottin/Documents/Personal/pythonstarships/collectallresources/collectrss.log"
     with LogFile(logfilepath):
-        device = Device(language="en")
+        device = Device(language="ru")
         client = None
 
         if device.refreshToken:
@@ -97,7 +97,7 @@ def main():
                 client = authenticate(device, email, password)
 
         while client:
-            time.sleep(random.uniform(15.5, 30.5))
+            time.sleep(random.uniform(5.0, 10.0))
             client.heartbeat()
             time.sleep(random.uniform(0.1, 1.0))
 

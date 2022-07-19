@@ -76,7 +76,10 @@ class Client(object):
             )
         )
         userId = d["UserService"]["UserLogin"]["@UserId"]
-        self.credits = d["UserService"]["UserLogin"]["User"]["@Credits"]
+        self.credits = int(d["UserService"]["UserLogin"]["User"]["@Credits"])
+        self.dailyReward = int(
+            d["UserService"]["UserLogin"]["User"]["@DailyRewardStatus"]
+        )
 
         if not self.device.refreshToken:
             myName = "guest"
@@ -89,7 +92,7 @@ class Client(object):
                 r.text.split('FreeStarbuxReceivedToday="')[1].split('"')[0]
             )
 
-        # print(f"You received {self.freeStarbuxToday} starbux today.")
+        print(f"You have collected {self.freeStarbuxToday} starbux today.")
         # keep it
         # Store User details here.
         self.user = User(
@@ -102,14 +105,17 @@ class Client(object):
     def getAccessToken(self, refreshToken=None):
 
         if self.accessToken:
+            print(f"{self.accessToken=}")
             return self.accessToken
+
+        self.checksum = ChecksumCreateDevice(self.device.key, self.device.name)
 
         url = (
             self.baseUrl
             + "DeviceLogin8?deviceKey="
             + self.device.key
             + "&advertisingKey=&isJailBroken=False&checksum="
-            + ChecksumCreateDevice(self.device.key, self.device.name)
+            + self.checksum
             + "&deviceType=DeviceType"
             + self.device.name
             + "&signal=False&languageKey="
@@ -147,11 +153,11 @@ class Client(object):
 
         if not self.getAccessToken(self.device.refreshToken):
             print("[login] failed to get access token")
-            return
+            return None
 
         # double check if something goes wrong
         if not self.accessToken:
-            return
+            return None
 
         # authorization just fine with refreshToken, we're in da house
         if self.device.refreshToken and self.accessToken:
@@ -163,10 +169,11 @@ class Client(object):
 
         # login with credentials and accessToken
         ts = "{0:%Y-%m-%dT%H:%M:%S}".format(DotNet.validDateTime())
-        checksum = ChecksumEmailAuthorize(
+        self.checksum = ChecksumEmailAuthorize(
             self.device.key, email, ts, self.accessToken, self.salt
         )
-        self.checksum = checksum
+        print("f{checksum=}")
+        #        self.checksum = checksum
 
         # if refreshToken was used we get acquire session without credentials
         if self.device.refreshToken:
@@ -174,7 +181,7 @@ class Client(object):
                 self.baseUrl
                 + "UserEmailPasswordAuthorize2?clientDateTime={}&checksum={}&deviceKey={}&accessToken={}&refreshToken={}".format(
                     ts,
-                    checksum,
+                    self.checksum,
                     self.device.key,
                     self.accessToken,
                     self.device.refreshToken,
@@ -363,8 +370,6 @@ class Client(object):
         return False
 
     def grabFlyingStarbux(self, quantity):
-        if datetime.datetime.now().time() == datetime.time(20, 0):
-            self.freeStarbuxToday = 0
 
         if (
             self.user.isAuthorized
@@ -384,7 +389,6 @@ class Client(object):
                 )
             )
             r = self.request(url, "POST")
-            d = xmltodict.parse(r.content, xml_attribs=True)
 
             if "Email=" not in r.text:
                 print(f"[grabFlyingStarbux] failed with next issue: {r.text}")
@@ -403,6 +407,7 @@ class Client(object):
             hours = self.user.lastHeartBeat.split("T")[1]
             seconds = hours.split(":")[-1]
             if DotNet.validDateTime().second == int(seconds):
+                print(f"{DotNet.validDateTime().second=} {int(seconds)=}")
                 return
 
         t = DotNet.validDateTime()
@@ -430,5 +435,6 @@ class Client(object):
         return success
 
     def request(self, url, method=None, data=None):
+        #        print(url)
         r = requests.request(method, url, headers=self.headers, data=data)
         return r
