@@ -309,7 +309,11 @@ class Client(object):
         ):
             self.dailyReward = 0
 
-        if self.user.isAuthorized and not self.dailyReward:
+        if self.user.isAuthorized:
+            if not self.dailyReward:
+                print("You've already collected the daily reward from the dropship.")
+                return False
+
             url = "https://api.pixelstarships.com/UserService/CollectDailyReward2?dailyRewardStatus=Box&argument={}&accessToken={}".format(
                 self.dailyRewardArgument,
                 self.accessToken,
@@ -320,9 +324,7 @@ class Client(object):
             if "You already collected this reward" in r.text:
                 self.dailyRewardTimestamp = time.time()
                 self.dailyReward = 1
-                print(
-                    "The script already collected the daily reward from the dropship."
-                )
+                print("You've already collected the daily reward from the dropship.")
                 return False
 
             if "Rewards have been changed" in r.text:
