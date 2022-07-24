@@ -104,7 +104,7 @@ def main():
             client.grabFlyingStarbux(random.randint(1, 2))
             time.sleep(random.uniform(5.0, 10.0))
 
-            if client.freeStarbuxToday == 10:
+            if client.freeStarbuxToday >= 10:
                 if client.collectDailyReward():
                     print("The script collected the daily reward from the dropship.")
                 time.sleep(random.uniform(5.0, 10.0))
