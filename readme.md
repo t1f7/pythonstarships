@@ -19,6 +19,8 @@ It also stores a token to relogin without credentials.
 * Then a client must be created `client = Client(device=device)`
 * Use `client.login()` and `client.heartbeat()` to keep your session alive as a guest
 * Use `client.login(email='supra@mail', password='1337')` and `client.heartbeat()` to keep authorized session alive
+* Use `client.quickReload()` to re-authenticate your session
+
 
 It seems that battle is simulated server-side so we have to simulate it client-side, and I don't have enough time to make it. Maybe later.
 But you could join first battle and leave. Server would insta-simulate data as soon as you reconnect.
