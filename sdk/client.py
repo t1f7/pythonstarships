@@ -76,7 +76,10 @@ class Client(object):
             )
         )
         userId = d["UserService"]["UserLogin"]["@UserId"]
-        self.credits = int(d["UserService"]["UserLogin"]["User"]["@Credits"])
+        try:
+            self.credits = int(d["UserService"]["UserLogin"]["User"]["@Credits"])
+        except:
+            self.credits = None
         self.dailyReward = int(
             d["UserService"]["UserLogin"]["User"]["@DailyRewardStatus"]
         )
@@ -397,6 +400,7 @@ class Client(object):
             self.freeStarbuxToday = int(
                 r.text.split('FreeStarbuxReceivedToday="')[1].split('"')[0]
             )
+            print(f"You've collected a total of {self.freeStarbuxToday} starbux today.")
             self.freeStarbuxTodayTimestamp = time.time()
 
             return True
@@ -428,13 +432,19 @@ class Client(object):
         if r.status_code == 200 and 'success="t' in r.text:
             success = True
         else:
-            print("Heartbeat fail")
+            print("Heartbeat fail. Attempting to reauthorized access token.")
+            self.quickReload()
 
         self.user.lastHeartBeat = "{0:%Y-%m-%dT%H:%M:%S}".format(t)
 
         return success
 
     def request(self, url, method=None, data=None):
-        #        print(url)
+        # print(url)
         r = requests.request(method, url, headers=self.headers, data=data)
+        if "Failed to authorize access token" in r.text:
+            print("Attempting to reauthorized access token.")
+            self.quickReload()
+            r = requests.request(method, url, headers=self.headers, data=data)
+
         return r
