@@ -1,5 +1,5 @@
 
-[![v0.2](https://github.com/t1f7/pythonstarships/blob/main/pixelbot.png)](https://github.com/t1f7/pythonstarships/blob/main/pixelbot.png)
+[![v0.5](https://github.com/raelldottin/pythonstarships/blob/main/pixelbot.png)](https://github.com/raelldottin/pythonstarships/blob/main/pixelbot.png)
 
 # Requirements
 
