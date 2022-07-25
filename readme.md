@@ -1,5 +1,7 @@
 
-[![{{ current.version }}](https://github.com/raelldottin/pythonstarships/blob/main/pixelbot.png)](https://github.com/raelldottin/pythonstarships/blob/main/pixelbot.png)
+# [![Integration Tests](https://github.com/{{ repository.name }}/actions/workflows/integration-tests.yaml/badge.svg?branch={{ current.branch }})](https://github.com/{{ repository.name }}/actions/workflows/integration-tests.yaml?query=branch%3A{{ current.branch }})
+
+[![ {{ current.version }} ](https://github.com/raelldottin/{{ repository.name }}/blob/main/pixelbot.png)](https://github.com/raelldottin/{{ repository.name }}/blob/main/pixelbot.png)
 
 # Requirements
 
