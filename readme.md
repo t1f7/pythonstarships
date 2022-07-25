@@ -1,10 +1,7 @@
 <!---
 This file is auto-generate by a github hook please modify readme.template if you don't want to loose your work
 -->
-
-# [![Integration Tests](https://github.com/raelldottin/pythonstarships/actions/workflows/integration-tests.yaml/badge.svg?branch=collectallresources)](https://github.com/raelldottin/pythonstarships/actions/workflows/integration-tests.yaml?query=branch%3Acollectallresources)
-
-[![ v0.5.62 ](https://github.com/raelldottin/raelldottin/pythonstarships/blob/main/pixelbot.png)](https://github.com/raelldottin/raelldottin/pythonstarships/blob/main/pixelbot.png)
+[![ v0.5.63 ](https://github.com/raelldottin/raelldottin/pythonstarships/blob/main/pixelbot.png)](https://github.com/raelldottin/raelldottin/pythonstarships/blob/main/pixelbot.png)
 
 # Requirements
 
