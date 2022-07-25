@@ -267,7 +267,7 @@ class Client(object):
                 return False
 
             if d["MessageService"]["ListActiveMarketplaceMessages"]["Messages"] == None:
-                print("There are no items being sold.")
+                print("You have no items listed on the marketplace.")
                 return False
 
             for k, v in d["MessageService"]["ListActiveMarketplaceMessages"][
@@ -298,10 +298,10 @@ class Client(object):
             self.rssCollectedTimestamp = time.time()
 
             print(
-                f"There is a total of {d['RoomService']['CollectResources']['Items']['Item'][0]['@Quantity']} minerals on the ship."
+                f"There is a total of {d['RoomService']['CollectResources']['Items']['Item'][0]['@Quantity']} minerals on your ship."
             )
             print(
-                f"There is a total of {d['RoomService']['CollectResources']['Items']['Item'][1]['@Quantity']} gas on the ship."
+                f"There is a total of {d['RoomService']['CollectResources']['Items']['Item'][1]['@Quantity']} gas on your ship."
             )
 
             return True
