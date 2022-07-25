@@ -106,7 +106,11 @@ def main():
 
             if client.freeStarbuxToday >= 10:
                 if client.collectDailyReward():
-                    print("The script collected the daily reward from the dropship.")
+                    print("You've collected the daily reward from the dropship.")
+                else:
+                    print(
+                        "You've already collected the daily reward from the dropship."
+                    )
                 time.sleep(random.uniform(5.0, 10.0))
 
                 # if client.collectMiningDrone(11638355):
