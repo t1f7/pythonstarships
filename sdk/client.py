@@ -79,9 +79,13 @@ class Client(object):
             self.credits = int(d["UserService"]["UserLogin"]["User"]["@Credits"])
         except:
             self.credits = None
-        self.dailyReward = int(
-            d["UserService"]["UserLogin"]["User"]["@DailyRewardStatus"]
-        )
+
+        try:
+            self.dailyReward = int(
+                d["UserService"]["UserLogin"]["User"]["@DailyRewardStatus"]
+            )
+        except:
+            self.dailyReward = 0
 
         if not self.device.refreshToken:
             myName = "guest"
@@ -310,8 +314,7 @@ class Client(object):
             self.dailyReward = 0
 
         if self.user.isAuthorized:
-            if not self.dailyReward:
-                print("You've already collected the daily reward from the dropship.")
+            if self.dailyReward:
                 return False
 
             url = "https://api.pixelstarships.com/UserService/CollectDailyReward2?dailyRewardStatus=Box&argument={}&accessToken={}".format(
@@ -324,7 +327,6 @@ class Client(object):
             if "You already collected this reward" in r.text:
                 self.dailyRewardTimestamp = time.time()
                 self.dailyReward = 1
-                print("You've already collected the daily reward from the dropship.")
                 return False
 
             if "Rewards have been changed" in r.text:
