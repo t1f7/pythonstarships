@@ -4,8 +4,7 @@
 # git config core.hooksPath .githooks
 
 # run from the root of the repo
-.githooks/replace_by_git_vars.py readme.md README.md
+.githooks/replace_by_git_vars.py readme.md README.md -v
 
 # Example:
 # [![Integration Tests](https://github.com/{{ repository.name }}/actions/workflows/integration-tests.yaml/badge.svg?branch={{ current.branch }})](https://github.com/{{ repository.name }}/actions/workflows/integration-tests.yaml?query=branch%3A{{ current.branch }})
-
