@@ -1,4 +1,4 @@
-[![ {{ current.version }} ](https://github.com/raelldottin/{{ repository.name }}/blob/main/pixelbot.png)](https://github.com/raelldottin/{{ repository.name }}/blob/main/pixelbot.png)
+[![ {{ current.version }} ](https://github.com/{{ repository.name }}/blob/main/pixelbot.png)](https://github.com/{{ repository.name }}/blob/main/pixelbot.png)
 
 # Requirements
 
