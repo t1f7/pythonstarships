@@ -96,7 +96,6 @@ git_vars["tags"] = (
     .strip()
     .decode("utf-8")
 )
-git_vars["current.version"] = git_vars["tags"][0] if len(git_vars["tags"]) else None
 
 if verbose:
     print(json.dumps(git_vars, indent=4))
