@@ -380,7 +380,7 @@ class Client(object):
         if (
             self.user.isAuthorized
             and self.freeStarbuxToday < 10
-            and self.freeStarbuxTodayTimestamp + 120 < time.time()
+            and self.freeStarbuxTodayTimestamp + 180 < time.time()
         ):
             t = DotNet.validDateTime()
 
@@ -397,7 +397,8 @@ class Client(object):
             r = self.request(url, "POST")
 
             if "Email=" not in r.text:
-                print(f"[grabFlyingStarbux] failed with next issue: {r.text}")
+                print("Attempting to reauthorized access token.")
+                self.quickReload()
                 return False
 
             self.freeStarbuxToday = int(
