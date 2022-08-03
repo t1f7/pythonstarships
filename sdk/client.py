@@ -296,7 +296,11 @@ class Client(object):
                 print(f"An error occurred: {r.text}.")
                 return False
 
-            self.credits = d["RoomService"]["CollectResources"]["User"]["@Credits"]
+            try:
+                self.credits = d["RoomService"]["CollectResources"]["User"]["@Credits"]
+            except:
+                self.credits = None
+
             self.rssCollectedTimestamp = time.time()
 
             print(
