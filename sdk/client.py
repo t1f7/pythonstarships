@@ -79,7 +79,7 @@ class Client(object):
         try:
             self.credits = int(d["UserService"]["UserLogin"]["User"]["@Credits"])
         except:
-            self.credits = None
+            pass
 
         try:
             self.dailyReward = int(
@@ -299,7 +299,7 @@ class Client(object):
             try:
                 self.credits = d["RoomService"]["CollectResources"]["User"]["@Credits"]
             except:
-                self.credits = None
+                pass
 
             self.rssCollectedTimestamp = time.time()
 
