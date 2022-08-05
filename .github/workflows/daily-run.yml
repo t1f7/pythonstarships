@@ -1,11 +1,5 @@
 name: Daily Automated Actions
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
   schedule:
     - cron: '1 20 * * *'
 
@@ -28,6 +22,10 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - name: Run code for .rst
+      - name: Proccess accounts
         run: |
-          python main.py -a "${{ secrets.auth_string_rst }}" -e "${{ secrets.email_username }}" -p "${{ secrets.email_password }}" -r "${{ secrets.email_recipient }}"
+          python main.py -a "${{ secrets.auth_string_first }}" -e "${{ secrets.email_username }}" -p "${{ secrets.email_password }}" -r "${{ secrets.email_recipient }}"
+          python main.py -a "${{ secrets.auth_string_second }}" -e "${{ secrets.email_username }}" -p "${{ secrets.email_password }}" -r "${{ secrets.email_recipient }}"
+          python main.py -a "${{ secrets.auth_string_third }}" -e "${{ secrets.email_username }}" -p "${{ secrets.email_password }}" -r "${{ secrets.email_recipient }}"
+          python main.py -a "${{ secrets.auth_string_fourth }}" -e "${{ secrets.email_username }}" -p "${{ secrets.email_password }}" -r "${{ secrets.email_recipient }}"
+          python main.py -a "${{ secrets.auth_string_fifth }}" -e "${{ secrets.email_username }}" -p "${{ secrets.email_password }}" -r "${{ secrets.email_recipient }}"
