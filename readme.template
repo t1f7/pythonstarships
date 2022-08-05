@@ -10,8 +10,6 @@ Automate trivial tasks in Pixel Starships Mobile Starategy Sci-Fi MMORPG
 
 `pip3 install requests`
 
-+ to update `sdk/dotnet.validDateTime` - I messed with timezones and you should update this place if authentication doesn't work.
-
 # Docs
 
 It's super basic, one thing to note: `Device` class automatically saves generated device. Call `.reset()` method to cleanup saved data.
