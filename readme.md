@@ -1,9 +1,9 @@
 <!---
 This file is auto-generate by a github hook please modify readme.template if you don't want to loose your work
 -->
-[![ v0.5.90 ](https://github.com/raelldottin/pythonstarships/blob/main/pixelbot.png)](https://github.com/raelldottin/pythonstarships/blob/main/pixelbot.png)
+[![ v0.5.91 ](https://github.com/raelldottin/pythonstarships/blob/main/pixelbot.png)](https://github.com/raelldottin/pythonstarships/blob/main/pixelbot.png)
 
-# raelldottin/pythonstarships v0.5.90
+# raelldottin/pythonstarships v0.5.91
 
 # Requirements
 
