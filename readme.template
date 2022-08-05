@@ -29,3 +29,6 @@ It also stores a token to relogin without credentials.
 
 It seems that battle is simulated server-side so we have to simulate it client-side, and I don't have enough time to make it. Maybe later.
 But you could join first battle and leave. Server would insta-simulate data as soon as you reconnect.
+
+---
+[![GitHub Metrics Updates](https://github.com/{{ repository.name }}/actions/workflows/daily-run.yml/badge.svg)](https://github.com/{{ repository.name }}/actions/workflows/dail-run.yml)

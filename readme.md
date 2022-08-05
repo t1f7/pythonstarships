@@ -1,9 +1,9 @@
 <!---
 This file is auto-generate by a github hook please modify readme.template if you don't want to loose your work
 -->
-[![ v0.5.109 ](https://github.com/raelldottin/pythonstarships/blob/main/pixelbot.png)](https://github.com/raelldottin/pythonstarships/blob/main/pixelbot.png)
+[![ v0.5.110 ](https://github.com/raelldottin/pythonstarships/blob/main/pixelbot.png)](https://github.com/raelldottin/pythonstarships/blob/main/pixelbot.png)
 
-# raelldottin/pythonstarships v0.5.109
+# raelldottin/pythonstarships v0.5.110
 
 Automate trivial tasks in Pixel Starships Mobile Starategy Sci-Fi MMORPG
 
@@ -32,3 +32,6 @@ It also stores a token to relogin without credentials.
 
 It seems that battle is simulated server-side so we have to simulate it client-side, and I don't have enough time to make it. Maybe later.
 But you could join first battle and leave. Server would insta-simulate data as soon as you reconnect.
+
+---
+[![GitHub Metrics Updates](https://github.com/raelldottin/pythonstarships/actions/workflows/daily-run.yml/badge.svg)](https://github.com/raelldottin/pythonstarships/actions/workflows/dail-run.yml)
