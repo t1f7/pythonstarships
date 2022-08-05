@@ -1,0 +1,24 @@
+name: Daily Automated Actions
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '1 20 * * *'
+
+jobs:
+  daily-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      -name: Setup Python version 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run code
+        run: |
+          python main.py --auth ${{ secrets.auth_string }} --usernmae ${{ secrets.email_username }} --password ${{ secrets.email_password }} --recipient ${{ secrets.email_recipient }}
