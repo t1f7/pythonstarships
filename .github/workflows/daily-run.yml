@@ -7,6 +7,7 @@ on:
 
 jobs:
   daily-run:
+    name: Runs daily at midnight UTC
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
