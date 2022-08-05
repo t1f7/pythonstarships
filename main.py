@@ -29,21 +29,24 @@ class LogFile:
         sys.stdout = self.old_stdout
 
 
-def email_logfile(filename, client):
-    config = ConfigParser()
-    config.read(
-        "/Users/rdottin/Documents/Personal/pythonstarships/collectallresources/.config"
-    )
-
-    try:
-        email = config.get("MAIL_CONFIG", "SENDER_EMAIL")
-        password = config.get("MAIL_CONFIG", "SENDER_PASSWD")
-        recipient = config.get("MAIL_CONFIG", "RECIPIENT_EMAIL")
-    except:
-        print(
-            "Unable to email log file because email authentication is not properly setup."
+def email_logfile(filename, client, email=None, password=None, recipient=None):
+    if email and password and recipient:
+        pass
+    else:
+        config = ConfigParser()
+        config.read(
+            "/Users/rdottin/Documents/Personal/pythonstarships/collectallresources/.config"
         )
-        return None
+
+        try:
+            email = config.get("MAIL_CONFIG", "SENDER_EMAIL")
+            password = config.get("MAIL_CONFIG", "SENDER_PASSWD")
+            recipient = config.get("MAIL_CONFIG", "RECIPIENT_EMAIL")
+        except:
+            print(
+                "Unable to email log file because email authentication is not properly setup."
+            )
+            return None
 
     with open(filename, "rb") as f:
         logs = f.read()
@@ -92,6 +95,33 @@ def main():
         dest="auth",
         default=None,
         help="authentication string",
+    )
+    parser.add_argument(
+        "-e",
+        "--email",
+        nargs=1,
+        action="store",
+        dest="email",
+        default=None,
+        help="username for smtp",
+    )
+    parser.add_argument(
+        "-p",
+        "--password",
+        nargs=1,
+        action="store",
+        dest="password",
+        default=None,
+        help="password for smtp",
+    )
+    parser.add_argument(
+        "-r",
+        "--recipient",
+        nargs=1,
+        action="store",
+        dest="recipient",
+        default=None,
+        help="recipient for the email log",
     )
     args = parser.parse_args()
     logfilepath = "/Users/rdottin/Documents/Personal/pythonstarships/collectallresources/collectrss.log"
@@ -158,7 +188,16 @@ def main():
                 )
                 print(f"You have a total of {client.credits} starbux.")
                 break
-    email_logfile(logfilepath, client)
+    if (
+        type(args.email) == list
+        and type(args.password) == list
+        and type(args.recipient) == list
+    ):
+        email_logfile(
+            logfilepath, client, args.email[0], args.password[0], args.recipient[0]
+        )
+    else:
+        email_logfile(logfilepath, client)
 
 
 if __name__ == "__main__":
