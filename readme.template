@@ -1,8 +1,8 @@
-[![ {{ current.version }} ](https://github.com/{{ repository.name }}/blob/main/pixelbot.png)](https://github.com/{{ repository.name }}/blob/main/pixelbot.png)
-
 # {{ repository.name }} {{ current.version }}
 
 Automate trivial tasks in Pixel Starships Mobile Starategy Sci-Fi MMORPG
+
+[![ {{ current.version }} ](https://github.com/{{ repository.name }}/blob/main/pixelbot.png)](https://github.com/{{ repository.name }}/blob/main/pixelbot.png)
 
 # Requirements
 
