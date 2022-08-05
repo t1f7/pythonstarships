@@ -70,11 +70,11 @@ class Client(object):
         d = xmltodict.parse(r.content, xml_attribs=True)
 
         info = d["UserService"]["UserLogin"]["User"]
-        print(
-            "Your Pixel Starhips username is {} with {} as its registered email address.".format(
-                info["@Name"], info["@Email"]
-            )
-        )
+        # print(
+        #    "Your Pixel Starhips username is {} with {} as its registered email address.".format(
+        #        info["@Name"], info["@Email"]
+        #    )
+        # )
         userId = d["UserService"]["UserLogin"]["@UserId"]
         try:
             self.credits = int(d["UserService"]["UserLogin"]["User"]["@Credits"])
