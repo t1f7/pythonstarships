@@ -30,4 +30,4 @@ jobs:
           pip install -r requirements.txt
       - name: Run code for .rst
         run: |
-          python main.py -a "${{ secrets.auth_string_rst }}" -u "${{ secrets.email_username }}" -p "${{ secrets.email_password }}" -r "${{ secrets.email_recipient }}"
+          python main.py -a "${{ secrets.auth_string_rst }}" -e "${{ secrets.email_username }}" -p "${{ secrets.email_password }}" -r "${{ secrets.email_recipient }}"
