@@ -1,9 +1,9 @@
 <!---
 This file is auto-generate by a github hook please modify readme.template if you don't want to loose your work
 -->
-[![ v0.5.91 ](https://github.com/raelldottin/pythonstarships/blob/main/pixelbot.png)](https://github.com/raelldottin/pythonstarships/blob/main/pixelbot.png)
+[![ v0.5.92 ](https://github.com/raelldottin/pythonstarships/blob/main/pixelbot.png)](https://github.com/raelldottin/pythonstarships/blob/main/pixelbot.png)
 
-# raelldottin/pythonstarships v0.5.91
+# raelldottin/pythonstarships v0.5.92
 
 # Requirements
 
@@ -24,7 +24,9 @@ It also stores a token to relogin without credentials.
 * Use `client.login()` and `client.heartbeat()` to keep your session alive as a guest
 * Use `client.login(email='supra@mail', password='1337')` and `client.heartbeat()` to keep authorized session alive
 * Use `client.quickReload()` to re-authenticate your session
-
+* Use `client.listActiveMarketplaceMessages()` to list all items you have available for sell in the marketplace
+* Use `client.collectAllResources()` to collect all resources on your ship
+* Use `client.collectDailyReward()` to collect the daily reward
 
 It seems that battle is simulated server-side so we have to simulate it client-side, and I don't have enough time to make it. Maybe later.
 But you could join first battle and leave. Server would insta-simulate data as soon as you reconnect.
