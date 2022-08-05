@@ -1,6 +1,5 @@
 name: Daily Automated Actions
 on:
-  push:
   pull_request:
   schedule:
     - cron: '1 20 * * *'
