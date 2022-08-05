@@ -2,6 +2,8 @@
 
 # {{ repository.name }} {{ current.version }}
 
+Automate trivial tasks in Pixel Starships Mobile Starategy Sci-Fi MMORPG
+
 # Requirements
 
 `pip3 install xmltodict`
