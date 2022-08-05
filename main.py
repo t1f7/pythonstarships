@@ -9,6 +9,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email.message import Message
+import argparse
 
 
 class LogFile:
@@ -80,9 +81,26 @@ def authenticate(device, email=None, password=None):
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="Automate trivial tasks in Pixel Starships Mobile Starategy Sci-Fi MMORPG"
+    )
+    parser.add_argument(
+        "-a",
+        "--auth",
+        nargs=1,
+        action="store",
+        dest="auth",
+        default=None,
+        help="authentication string",
+    )
+    args = parser.parse_args()
     logfilepath = "/Users/rdottin/Documents/Personal/pythonstarships/collectallresources/collectrss.log"
     with LogFile(logfilepath):
-        device = Device(language="ru")
+        if type(args.auth) == list:
+            device = Device(language="ru", authentication_string=args.auth[0])
+        else:
+            device = Device(language="ru")
+
         client = None
 
         if device.refreshToken:
@@ -141,6 +159,7 @@ def main():
                 print(f"You have a total of {client.credits} starbux.")
                 break
     email_logfile(logfilepath, client)
+
 
 if __name__ == "__main__":
     main()
