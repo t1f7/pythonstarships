@@ -14,7 +14,10 @@ import argparse
 
 class LogFile:
     def __init__(self, filename):
-        self.out_file = open(filename, "w")
+        try:
+            self.out_file = open(filename, "w")
+        except:
+            self.out_file = open("collectrss.log", "w")
         self.old_stdout = sys.stdout
         sys.stdout = self
 
@@ -48,8 +51,13 @@ def email_logfile(filename, client, email=None, password=None, recipient=None):
             )
             return None
 
-    with open(filename, "rb") as f:
-        logs = f.read()
+    try:
+        with open(filename, "rb") as f:
+            logs = f.read()
+    except:
+        with open("collectrss.log", "rb") as f:
+            logs = f.read()
+
     message = Message()
     message.set_payload(logs)
     subject = f"Pixel Starships Automation Log: {client.user.name}"
